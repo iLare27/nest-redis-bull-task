@@ -1,18 +1,15 @@
 import {
   Body,
-  CacheTTL,
   Controller,
-  Get,
+  Get, ParseIntPipe,
   Post,
   Query,
-  UseInterceptors,
   UsePipes,
   ValidationPipe
 } from "@nestjs/common";
 import { CreateUserDto } from '../dtos/user.dto';
 import { UsersService } from '../services/users.service';
 import { User } from "../entities/user.entity";
-import { CacheInterceptor } from "@nestjs/cache-manager";
 
 @Controller('users')
 export class UsersController {
@@ -26,9 +23,7 @@ export class UsersController {
   }
 
   @Get('get-user-by-id')
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(1800000)
-  async getUserById(@Query('id') id: string) {
+  async getUserById(@Query('id', ParseIntPipe) id: number) {
     const user: User = await this.usersService.getUserById(id);
     return { statusCode: 200, message: "SUCCESS", user: user };
   }

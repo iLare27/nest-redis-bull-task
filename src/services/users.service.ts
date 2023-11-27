@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../entities/user.entity";
 import { Repository } from "typeorm";
@@ -31,20 +31,35 @@ export class UsersService {
 
     const createdUser = await this.usersRepository.save(createUserDto);
 
-
+    await this.userQueue.add('update-status', { userId: createdUser.id }, { delay: 10000 });
 
     return createdUser;
   }
 
-  async getUserById(userId): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { id: userId } });
+  async getUserById(userId: number): Promise<User> {
+    const cacheKey = `user:${userId}`;
+    let user = await this.cacheManager.get<User>(cacheKey);
+
     if (!user) {
-      throw new NotFoundException('ERR_USER_NOT_FOUND');
+      user = await this.usersRepository.findOne({ where: { id: userId } });
+
+      if (!user) {
+        throw { statusCode: 400, message: "ERR_USER_NOT_FOUND" }
+      }
+
+      if (user.status === true) {
+        await this.cacheManager.set(cacheKey, user, 1800000);
+      }
     }
+
     return user;
   }
 
-  async updateUserStatus(userId, ) {
 
+  async updateUserStatus(userId: number, status: boolean): Promise<void> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+    user.status = status;
+    await this.usersRepository.save(user);
   }
 }

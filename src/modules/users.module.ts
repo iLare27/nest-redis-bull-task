@@ -5,6 +5,7 @@ import { UsersService } from '../services/users.service';
 import { User } from '../entities/user.entity';
 import { BullModule } from "@nestjs/bull";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { UserProcessor } from "../processors/user.processor";
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]),
@@ -23,7 +24,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, UserProcessor],
   exports: [UsersService],
 })
 export class UsersModule {}
