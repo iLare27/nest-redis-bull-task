@@ -21,11 +21,9 @@ export class UsersService {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.usersRepository.findOne(
-      { where: { email: createUserDto.email } }
-    );
+    const isUniqueEmail = await this.checkEmailUniqueness(createUserDto.email)
 
-    if (existingUser) {
+    if (isUniqueEmail) {
       throw { statusCode: 400, message: 'ERR_USER_EMAIL_EXISTS' };
     }
 
@@ -61,5 +59,10 @@ export class UsersService {
 
     user.status = status;
     await this.usersRepository.save(user);
+  }
+
+  async checkEmailUniqueness(email: string): Promise<boolean> {
+    const existingUser = await this.usersRepository.findOne({ where: { email } });
+    return !existingUser;
   }
 }
