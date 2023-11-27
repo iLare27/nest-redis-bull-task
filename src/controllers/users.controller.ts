@@ -27,4 +27,5 @@ export class UsersController {
     const user: User = await this.usersService.getUserById(id);
     return { statusCode: 200, message: "SUCCESS", user: user };
   }
+
 }

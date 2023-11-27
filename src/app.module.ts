@@ -4,7 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from "./modules/users.module";
 import { CacheModule } from "@nestjs/cache-manager";
 import { redisStore } from "cache-manager-redis-yet";
-import { BullModule } from "@nestjs/bull";
+import { HttpModule } from "./modules/http.module";
 
 @Module({
   imports: [
@@ -19,7 +19,7 @@ import { BullModule } from "@nestjs/bull";
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true,
+        synchronize: true, //false in prod
         autoLoadEntities: true,
       }),
 
@@ -35,7 +35,7 @@ import { BullModule } from "@nestjs/bull";
       isGlobal: true,
       inject: [ConfigService],
     }),
-    UsersModule
+    UsersModule, HttpModule
   ],
 })
 export class AppModule {}
